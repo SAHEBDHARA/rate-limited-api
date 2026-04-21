@@ -8,7 +8,6 @@ A production-considerate API service built with Go, featuring atomic rate limiti
 - **Atomic Rate Limiting**: Fixed-window rate limiting (5 req/min) using Redis `INCR` to ensure accuracy under high concurrency.
 - **Persistent Stats**: Per-user request counts stored in Redis.
 - **Dockerized**: Ready-to-go environment with `docker-compose`.
-- **Dockerized**: Ready-to-go environment with `docker-compose`.
 
 ## 🛠 Tech Stack
 
@@ -82,6 +81,10 @@ The rate limiter uses Redis's atomic `INCR` operation. You can test it by firing
 ```bash
 # Example using curl in parallel (bash)
 for i in {1..10}; do curl -X POST http://localhost:8080/api/request -d '{"user_id":"demo","payload":"test"}' & done
+```
+
+You will notice through the logs or responses that exactly 5 requests succeed, and the rest return `429 Too Many Requests`.
+
 ---
 
 ## 🧠 Design Decisions
