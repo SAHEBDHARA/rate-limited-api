@@ -82,5 +82,18 @@ The rate limiter uses Redis's atomic `INCR` operation. You can test it by firing
 ```bash
 # Example using curl in parallel (bash)
 for i in {1..10}; do curl -X POST http://localhost:8080/api/request -d '{"user_id":"demo","payload":"test"}' & done
-```
-You will notice that exactly 5 requests succeed, and the rest return `429 Too Many Requests`.
+---
+
+## 🧠 Design Decisions
+
+- **Atomic Concurrency**: We used Redis `INCR` and `EXPIRE`. This ensures that even if 100 requests arrive at the same millisecond, the count remains accurate because Redis processes commands in a single-threaded, atomic queue.
+- **Fail-Fast Middleware**: Rate limiting is checked in a Gin Middleware. This prevents unauthorized or over-limit traffic from ever reaching the expensive business logic or allocating complex domain objects.
+- **Hexagonal Architecture**: By separating "Ports" (interfaces) from "Adapters" (implementations), the core logic is 100% testable without needing a real Redis instance or a network connection.
+
+## 🛠 Future Improvements (with more time)
+
+- **Sliding Window Counter**: Currently, we use a *Fixed Window* (resets exactly at the top of the minute). A *Sliding Window* would prevent "bursting" at the edges of two minutes (e.g., 5 requests at 11:59:59 and 5 at 12:00:01).
+- **Asynchronous Workers**: The `payload` processing could be moved to a background worker pool (using the provided `JobQueue` port) to return responses even faster.
+- **Robust Auth**: Replace the `user_id` header with a proper JWT or API Key authentication mechanism.
+- **Circuit Breakers**: Add a circuit breaker for Redis connections. If Redis goes down, we could decide to "fail open" (allow all) or "fail closed" (block all) based on business needs.
+- **Graceful Shutdown**: Implement signal handling in `main.go` to ensure the server finishes processing current requests before closing.
