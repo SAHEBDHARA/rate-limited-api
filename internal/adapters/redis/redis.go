@@ -8,7 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// NewRedisClient initializes and returns a connected Redis client.
 func NewRedisClient(addr, password string) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
@@ -16,7 +15,6 @@ func NewRedisClient(addr, password string) (*redis.Client, error) {
 		DB:       0,
 	})
 
-	// Verify connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

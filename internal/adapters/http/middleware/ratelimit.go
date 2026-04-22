@@ -3,18 +3,15 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"rate-limited-api/internal/core/ports"
+
+	"github.com/gin-gonic/gin"
 )
 
-// RateLimitMiddleware returns a Gin middleware that checks the rate limit for each user.
 func RateLimitMiddleware(limiter ports.RateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Query("user_id")
 		if userID == "" {
-			// In a real app, we might check a Header or JWT claim
-			// For this assignment, we'll try to get it from query or JSON body in the handler
-			// But for the middleware to be effective, let's look for it in a header or query
 			userID = c.GetHeader("X-User-ID")
 		}
 
@@ -37,7 +34,6 @@ func RateLimitMiddleware(limiter ports.RateLimiter) gin.HandlerFunc {
 			return
 		}
 
-		// Store userID in context for subsequent handlers
 		c.Set("user_id", userID)
 		c.Next()
 	}
